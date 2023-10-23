@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-with, initial-scale=1.0">
+    <title>Convertidor MP3 Youtube</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!-- Estilos personalizados -->
+    <style>
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #loading-indicator {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand"  href="#">Convertidor Youtube MP3</a>
+    </nav>
+
+<!-- Contenido principal -->
+    <div class="container mt-4">
+        <!-- Formulario -->
+        <div  id="video_formulario">
+            <form id="formulario">
+                <div class="form-group">
+                    <label for="url">URL de YouTube:</label>
+                    <input type="url" class="form-control" id="url" placeholder="Escribe la URL de YouTube">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enviar</button>
+                <span id="error_formulario" style="color: red; display: none"><br>No se ha podido obtener el video, compruebe la url.<br>
+                Si continua con el error pruebe a con otro video.</span>
+            </form>
+        </div>
+
+        <div id="video_info" class="text-center" style="display: none">
+            <div class="square">
+                <img id="imagen"src="#"  class="img-fluid">
+            </div>
+            <p id="titulo"class="mt-3"></p>
+            <a  id="cambiar_video" href="#" class="btn btn-warning mt-3"  >Cambiar video</a>
+            <a id="descargar_video" href="descargar/archivo" class="btn btn-primary mt-3"download="">Descargar</a>
+        </div>
+
+        <div id="video_completado" class="text-center" style="display: none">
+            <div class="square">
+                <img src="#"  class="img-fluid">
+            </div>
+            <p class="mt-3">Se ha completado la descarga</p>
+            <a href="#" class="btn btn-success mt-3">Descargar otro video</a>
+        </div>
+
+         <!-- Indicador de carga -->
+    <div id="loading-overlay">
+        <div id="loading-indicator"></div>
+    </div>
+
+    </div>
+
+<style>
+    .square {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .square img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<!-- Script jQuery para el efecto de carga -->
+    <script>
+        $(document).ready(function() {
+            var url = "";
+            var titulo = "";
+
+            $("#formulario").submit(function(event) {
+                event.preventDefault();
+
+                $("#loading-overlay").show();
+
+                url = $("#url").val();
+
+                if(url !== "") {
+                    $.get("info?url=" + url, function(data1, textStatus, jqXHR) {
+                        $("#error_formulario").hide();
+
+                        var link = 'descargar?url=' + url;
+
+                        $.get(link, function(data2, textStatus, jqXHR){
+                            if(!data2.status) {
+                                $("#video_info").hide();
+                                $("#video_formulario").show();
+                                $("#error_formulario").show();
+                                $("#loading-overlay").hide()
+                            } else {
+                                var imagen = data1.imagen;
+                                titulo = data1.titulo;
+
+                                $("#descargar_video").attr('download', titulo+'.mp3');
+
+                                console.log(imagen);
+                                console.log(titulo);
+
+                                $("#imagen").attr("src", imagen);
+                                $("#titulo").html(titulo);
+
+                                $("#video_formulario").hide();
+                                $("#video_info").show();
+                                $("#loading-overlay").hide();
+                            }
+                        });
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrow) {
+                        alert("no funciona");
+                        $("#error_formulario").show();
+                        $("#loading-overlay").hide();
+                    })
+                }
+            });
+
+            $("#cambiar_video").click(function() {
+                $("#video_info").hide();
+                $("#url").val("");
+                $("#video_formulario").show();
+            });
+        });
+</script>
+
+</body>
